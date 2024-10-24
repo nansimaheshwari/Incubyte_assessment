@@ -1,29 +1,43 @@
-function add(numbers) {
-  if (numbers === "") return 0;
-  let delimiter = /[\\n,]+/;
-
-  if (numbers.startsWith("//")) {
-    const newlineIndex = numbers.indexOf("\\n");
-    let customDelimiter = "";
-
-    if (newlineIndex !== -1) {
-      customDelimiter = numbers.slice(2, newlineIndex);
-      numbers = numbers.slice(newlineIndex + 2);
-    }
-    delimiter = new RegExp(`${customDelimiter}|${delimiter}`, "g");
+function extractCustomDelimiter(numbers) {
+  const newlineIndex = numbers.indexOf("\n");
+  if (newlineIndex !== -1) {
+    const customDelimiter = numbers.slice(2, newlineIndex);
+    numbers = numbers.slice(newlineIndex + 1);
+    return { customDelimiter, numbers };
   }
+  return { customDelimiter: "", numbers };
+}
 
-  const numsArray = numbers.split(delimiter);
+function createDelimiterRegex(customDelimiter) {
+  return new RegExp(`${customDelimiter}|[\n,]+`, "g");
+}
+
+function checkForNegatives(numsArray) {
   const negatives = numsArray.filter((num) => parseInt(num, 10) < 0);
   if (negatives.length > 0) {
     throw new Error(`Negative numbers not allowed: ${negatives.join(", ")}`);
   }
+}
 
-  const sum = numsArray.reduce(
-    (acc, curr) => acc + (parseInt(curr, 10) || 0),
-    0
-  );
-  return sum;
+function sumNumbers(numsArray) {
+  return numsArray.reduce((acc, curr) => acc + (parseInt(curr, 10) || 0), 0);
+}
+
+function add(numbers) {
+  if (numbers === "") return 0;
+
+  let customDelimiter = "";
+  if (numbers.startsWith("//")) {
+    const extracted = extractCustomDelimiter(numbers);
+    customDelimiter = extracted.customDelimiter;
+    numbers = extracted.numbers;
+  }
+
+  const delimiter = createDelimiterRegex(customDelimiter);
+  const numsArray = numbers.split(delimiter);
+
+  checkForNegatives(numsArray);
+  return sumNumbers(numsArray);
 }
 
 function calculate() {
