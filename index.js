@@ -9,20 +9,29 @@ function add(numbers) {
     if (newlineIndex !== -1) {
       customDelimiter = numbers.slice(2, newlineIndex);
       numbers = numbers.slice(newlineIndex + 2);
-      console.log(customDelimiter, numbers);
     }
     delimiter = new RegExp(`${customDelimiter}|${delimiter}`, "g");
-    console.log(delimiter, "f");
   }
 
   const numsArray = numbers.split(delimiter);
-  console.log(numsArray);
-  const sum = numsArray.reduce((acc, curr) => acc + parseInt(curr), 0);
+  const negatives = numsArray.filter((num) => parseInt(num, 10) < 0);
+  if (negatives.length > 0) {
+    throw new Error(`Negative numbers not allowed: ${negatives.join(", ")}`);
+  }
+
+  const sum = numsArray.reduce(
+    (acc, curr) => acc + (parseInt(curr, 10) || 0),
+    0
+  );
   return sum;
 }
 
 function calculate() {
   const input = document.getElementById("numbers").value;
-  const result = add(input);
-  document.getElementById("result").textContent = `Result: ${result}`;
+  try {
+    const result = add(input);
+    document.getElementById("result").textContent = `Result: ${result}`;
+  } catch (error) {
+    document.getElementById("result").textContent = error.message;
+  }
 }
